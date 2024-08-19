@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Simple S3 and Lambda Service
+  This SAM template defines a Lambda function that is triggered by an S3 bucket event.
+
+Resources:
+  MyBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-bucket"
+
+  MyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      CodeUri: ./src
+      Events:
+        S3Event:
+          Type: S3
+          Properties:
+            Bucket: !Ref MyBucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: .txt
+
+Outputs:
+  MyBucketName:
+    Description: "The name of the S3 bucket"
+    Value: !Ref MyBucket
+
+  MyFunctionName:
+    Description: "The name of the Lambda function"
+    Value: !Ref MyFunction

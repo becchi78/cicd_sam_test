@@ -1,0 +1,36 @@
+name: sam_static_analysis
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "feature/*"
+      - "fix/*"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 bandit pytest
+
+      - name: Run Flake8
+        run: flake8 src/
+
+      - name: Run Bandit
+        run: bandit -r src/
+
+      - name: Run Tests
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          pytest
